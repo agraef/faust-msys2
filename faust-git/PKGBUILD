@@ -1,0 +1,120 @@
+# Maintainer: Albert Graef <aggraef at gmail.com>
+# Contributor: Bernardo Barros <bernardobarros at gmail dot com>
+# Contributor: bjoern lindig (bjoern _dot_ lindig _at_ google.com)
+
+# This is a straightforward sys2/mingw port of the corresponding AUR package,
+# so the package contents should be the same. NOTE: Since the package contains
+# libraries, it uses the same layout as the msys2 mingw packages, i.e., the 32
+# bit package is installed under the mingw32 prefix, the 64 bit package under
+# mingw64, so that they can both be installed at the same time. (You won't
+# notice much of a difference between the two, though, unless you link your
+# Faust applications and modules to libfaust or the osclib/httpd libraries.)
+
+_realname=faust
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
+pkgver=2.5.21.r9518.7a26f3495
+pkgrel=1
+epoch=2
+pkgdesc="A functional programming language for realtime audio signal processing."
+arch=('any')
+url="http://faust.grame.fr/"
+license=('GPL')
+depends=("${MINGW_PACKAGE_PREFIX}-llvm35"
+# missing dep in llvm35-libs, llvm-libs already has it
+	 'libedit'
+# needed for sound2faust:
+	 "${MINGW_PACKAGE_PREFIX}-libsndfile"
+# needed for libfaustremote and faustbench:
+#	 'jack2'
+# needed for libHTTPDFaust:
+	 "${MINGW_PACKAGE_PREFIX}-libmicrohttpd" 'openssl')
+# We need xxd at build time, which is provided by 'gvim' and 'vim'.
+makedepends=('git' 'vim')
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname}=${pkgver}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+# This keeps the static libraries. Remove the 'staticlibs' option if this
+# isn't wanted.
+options=('staticlibs')
+# We're using the (default) master-dev branch of Faust here, which has all the
+# latest changes. End users might want to use the master branch instead, which
+# is supposedly more stable and tested, but nevertheless (mostly) up-to-date.
+source=("$pkgname::git+https://github.com/grame-cncm/faust.git#branch=master-dev"
+	"python2-fix.patch")
+md5sums=('SKIP'
+         '5bd95373f2d6f4e86a2befab669339f8')
+
+pkgver() {
+  cd $srcdir/$pkgname
+
+  # use un-annotated tags per
+  # https://wiki.archlinux.org/index.php/VCS_package_guidelines#Git
+  #git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+
+  # ... but unfortunately many releases go untagged right now, so we rather do
+  # it like this, because that gives us the real release number as running
+  # `faust --version` will report it
+  echo $(make debversion|sed -e s/+git.*//).r$(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+}
+
+prepare() {
+  cd $srcdir/$pkgname
+  git submodule update --init
+  # fix up scripts like faust2md which need python2 to run
+  patch -Np1 < $srcdir/python2-fix.patch
+}
+
+# NOTE: libHTTPDFaust requires 'libmicrohttpd' and 'openssl'.
+# Similarly, sound2faust requires libsndfile which we also include by default.
+# These are all optional, so you can get rid of the extra dependencies by
+# changing the build target from 'world' to 'all' and removing the
+# corresponding dependencies above.
+
+build() {
+  cd $srcdir/$pkgname
+  make PREFIX="/${MINGW_PREFIX}" world
+  # 'remote' and 'benchmark' are disabled right now since they require jack2.
+  #make benchmark remote PREFIX="/${MINGW_PREFIX}"
+}
+
+package() {
+  cd $srcdir/$pkgname
+  make install PREFIX="/${MINGW_PREFIX}" DESTDIR="${pkgdir}"
+
+  # docs
+  install -d "${pkgdir}/${MINGW_PREFIX}/share/doc/faust"
+  for x in documentation/*.{pdf,html} libraries/doc/*.{pdf,html}; do test -f $x && install -Dm644 $x "${pkgdir}/${MINGW_PREFIX}/share/doc/faust"; done
+
+  # examples
+  install -d "${pkgdir}/${MINGW_PREFIX}/share/faust/examples"
+  cp -R "examples/"* "${pkgdir}/${MINGW_PREFIX}/share/faust/examples/"
+
+  ## syntax highlighting files
+  cd syntax-highlighting
+
+  # atom
+  install -Dm644 "atom/language-faust/package.json" \
+    "${pkgdir}/${MINGW_PREFIX}/lib/atom/dot-atom/packages/language-faust/package.json"
+  install -Dm644 "atom/language-faust/grammars/faust.cson" \
+    "${pkgdir}/${MINGW_PREFIX}/lib/atom/dot-atom/packages/language-faust/grammars/faust.cson"
+  install -Dm644 "atom/language-faust/settings/language-faust.cson" \
+    "${pkgdir}/${MINGW_PREFIX}/lib/atom/dot-atom/packages/language-faust/settings/language-faust.cson"
+  install -t "${pkgdir}/${MINGW_PREFIX}/lib/atom/dot-atom/packages/language-faust/snippets/" \
+    -Dm644 "atom/language-faust/snippets/"*
+  install -Dm644 "atom/language-faust/process-palette.json.linux" \
+	  "${pkgdir}/${MINGW_PREFIX}/share/doc/faust/process-palette.json"
+  # kate
+  install -Dm644 faust.xml "${pkgdir}/${MINGW_PREFIX}/share/apps/katepart/syntax/faust.xml"
+  # gedit
+  install -Dm644 faust.lang "${pkgdir}/${MINGW_PREFIX}/share/gtksourceview-2.0/language-specs/faust.lang"
+  install -Dm644 faust.lang "${pkgdir}/${MINGW_PREFIX}/share/gtksourceview-3.0/language-specs/faust.lang"
+  # highlight
+  install -Dm644 dsp.lang "${pkgdir}/${MINGW_PREFIX}/share/highlight/langDefs/dsp.lang"
+  # nano
+  install -Dm644 "faust.nanorc" "${pkgdir}/${MINGW_PREFIX}/share/nano/faust.nanorc"
+  # vim
+  install -Dm644 faust.vim "${pkgdir}/${MINGW_PREFIX}/share/vim/vimfiles/syntax/faust.vim"
+  # emacs
+  install -d "${pkgdir}/${MINGW_PREFIX}/share/emacs/site-lisp/"
+  install -Dm644 faust-mode.el "${pkgdir}/${MINGW_PREFIX}/share/emacs/site-lisp/"
+}
