@@ -33,10 +33,12 @@ the case of the Emacs Faust mode) if you want to use these.
 Faust Msys2/Mingw32 Installer
 =============================
 
-We also provide an [MSI installer](faust-mingw32-2.5.21.exe) (created
-with [Advanced Installer][3]) which installs Faust into an existing msys2
-installation. This is currently available for 32 bit only (but will of course
-work on 64 bit Windows systems as well).
+We also provide an [MSI installer][] (created with [Advanced Installer][3])
+which installs Faust into an existing msys2 installation. This is currently
+available for 32 bit only (but will of course work on 64 bit Windows systems
+as well).
+
+[MSI installer]: https://github.com/agraef/faust-msys2/releases/download/2.5.21/faust-mingw32-2.5.21.exe
 
 To make this work, install the following packages inside the Msys2 environment
 using pacman:
