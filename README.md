@@ -1,6 +1,6 @@
 
-Faust msys2 mingw builds
-========================
+Faust msys2/mingw package builds
+================================
 
 These provide 32 and 64 bit builds of Grame's [Faust][0] for Windows.
 You'll need [msys2](http://www.msys2.org/) to use these. Install msys2
@@ -30,13 +30,15 @@ mingw32 and mingw64 prefixes, respectively. Thus you'll have to copy them over
 (e.g., from mingw32/usr/share/emacs/site-lisp to usr/share/emacs/site-lisp in
 the case of the Emacs Faust mode) if you want to use these.
 
-Faust Msys2/Mingw32 Installer
+Faust msys2/mingw32 installer
 =============================
 
 We also provide an [MSI installer][] (created with [Advanced Installer][3])
 which installs Faust into an existing msys2 installation. This is currently
 available for 32 bit only (but will of course work on 64 bit Windows systems
-as well).
+as well). This also sets up the environment so that Faust can be run from the
+Windows command line (the faust2xyz tool scripts will have to be run in the
+msys2 console, though, as they require bash).
 
 [MSI installer]: https://github.com/agraef/faust-msys2/releases/download/2.5.21/faust-mingw32-2.5.21.exe
 
