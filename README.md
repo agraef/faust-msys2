@@ -30,6 +30,25 @@ mingw32 and mingw64 prefixes, respectively. Thus you'll have to copy them over
 (e.g., from mingw32/usr/share/emacs/site-lisp to usr/share/emacs/site-lisp in
 the case of the Emacs Faust mode) if you want to use these.
 
+Faust Msys2/Mingw32 Installer
+=============================
+
+We also provide an [MSI installer](faust-mingw32-2.5.21.exe) (created
+with [Advanced Installer][3]) which installs Faust into an existing msys2
+installation. This is currently available for 32 bit only (but will of course
+work on 64 bit Windows systems as well).
+
+To make this work, install the following packages inside the Msys2 environment
+using pacman:
+
+    pacman -S --needed base-devel python2 mingw-w64-i686-toolchain mingw-w64-i686-llvm35 mingw-w64-i686-emacs mingw-w64-i686-libsndfile mingw-w64-i686-libmicrohttpd
+
+Note that this will be enough to run the Faust compiler itself and create
+executables and dlls using the mingw toolchain. However, using the various
+architectures and tool scripts will require additional software from
+msys2/mingw and elsewhere.
+
 [0]: http://faust.grame.fr/
 [1]: https://github.com/msys2/msys2/wiki/Creating-packages
 [2]: https://aur.archlinux.org/packages/faust-git/
+[3]: https://www.advancedinstaller.com/
