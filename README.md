@@ -40,7 +40,7 @@ as well). This also sets up the environment so that Faust can be run from the
 Windows command line (the faust2xyz tool scripts will have to be run in the
 msys2 console, though, as they require bash).
 
-[MSI installer]: https://github.com/agraef/faust-msys2/releases/download/2.5.21/faust-mingw32-2.5.21.exe
+[MSI installer]: https://github.com/agraef/faust-msys2/releases/download/2.5.21/faust-mingw32-2.5.21.msi
 
 To make this work, install the following packages inside the Msys2 environment
 using pacman:
